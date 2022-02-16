@@ -2,8 +2,8 @@
 export MAIN_ACCOUNT=lam-test6.testnet
 export NEAR_ENV=testnet
 export OWNER_ID=$MAIN_ACCOUNT
-# export ORACLE_ID=priceoracle.testnet
-export ORACLE_ID=priceoracle.$MAIN_ACCOUNT
+export ORACLE_ID=priceoracle.testnet
+# export ORACLE_ID=priceoracle.$MAIN_ACCOUNT
 export ACCOUNT_ID=$MAIN_ACCOUNT
 export CONTRACT_ID=nearlend.$MAIN_ACCOUNT
 export BOOSTER_TOKEN_ID=ref.fakes.testnet
@@ -172,8 +172,8 @@ near call $CONTRACT_ID --accountId=$OWNER_ID add_asset '{
   "asset_config": {
     "reserve_ratio": 2500,
     "target_utilization": 8000,
-    "target_utilization_rate": "1000000000002440418605283556",
-    "max_utilization_rate": "1000000000039724853136740579",
+    "target_utilization_rate": "1000000002440418608258400032",
+    "max_utilization_rate": "1000000039724853924983536086",
     "volatility_ratio": 9500,
     "extra_decimals": 0,
     "can_deposit": true,
@@ -224,3 +224,5 @@ near call $CONTRACT_ID --accountId=$OWNER_ID add_asset '{
 near view $CONTRACT_ID get_assets_paged '{"from_index": 0, "limit": 10}'
 
 ###################### End B5: Add asset #####################
+
+

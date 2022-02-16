@@ -29,6 +29,10 @@ impl Pool {
             } else {
                 U256::zero()
             };
+            log!("extra => {}", extra);
+            log!("self.shares.0 => {}", self.shares.0);
+            log!("amount => {}", amount);
+            log!("self.balance => {}", self.balance);
             ((U256::from(self.shares.0) * U256::from(amount) + extra) / U256::from(self.balance))
                 .as_u128()
         };

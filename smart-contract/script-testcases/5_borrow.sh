@@ -3,8 +3,8 @@
 export MAIN_ACCOUNT=lam-test6.testnet
 export NEAR_ENV=testnet
 export OWNER_ID=$MAIN_ACCOUNT
-# export ORACLE_ID=priceoracle.testnet
-export ORACLE_ID=priceoracle.$MAIN_ACCOUNT
+export ORACLE_ID=priceoracle.testnet
+# export ORACLE_ID=priceoracle.$MAIN_ACCOUNT
 export ACCOUNT_ID=$MAIN_ACCOUNT
 export CONTRACT_ID=nearlend.$MAIN_ACCOUNT
 export BOOSTER_TOKEN_ID=ref.fakes.testnet
@@ -79,5 +79,5 @@ near view $CONTRACT_ID get_assets_paged '{"from_index": 0, "limit": 10}'
 ###################### End B4: Thực hiện Borrow 1 DAI #####################
 
 
-near view nearlend.lam-test6.testnet get_account '{"account_id": "lam-test6.testnet"}' 
-near view nearlend.lam-test6.testnet get_assets_paged '{"from_index": 0, "limit": 10}'
+# near view nearlend.lam-test6.testnet get_account '{"account_id": "lam-test6.testnet"}' 
+# near view nearlend.lam-test6.testnet get_assets_paged '{"from_index": 0, "limit": 10}'

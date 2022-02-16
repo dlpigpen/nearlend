@@ -247,6 +247,7 @@ impl Contract {
 
         let available_amount = asset.available_amount();
         let max_borrow_shares = asset.borrowed.amount_to_shares(available_amount, false);
+        log!("max borrow shares => {}", max_borrow_shares.0);
 
         let (borrowed_shares, amount) =
             asset_amount_to_shares(&asset.borrowed, max_borrow_shares, &asset_amount, true);
