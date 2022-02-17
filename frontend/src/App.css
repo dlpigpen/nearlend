@@ -382,7 +382,7 @@ footer {
 
 .homepage .wrap-market .wrap-pool .asset .btn-claim {
   position: absolute;
-  left: 100px;
+  left: 110px;
   top: 10px;
 }
 
@@ -631,6 +631,7 @@ footer {
 }
 .portforlio .token-list .wrap-info {
   position: relative;
+  margin-bottom: 24px;
 }
 .portforlio .token-list .wrap-info .arrow-down {
   position: absolute;
