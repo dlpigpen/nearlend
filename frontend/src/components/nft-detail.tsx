@@ -39,7 +39,6 @@ export default function NftDetail() {
 
   return (
     <main className="nft-detail">
-      {isShowNoti && <CommingSoon setTurnOff={_handleTurnOffNoti} />}
       <div className="wrap-body">
         <div className="nft-info">
           <div className="container">
@@ -120,6 +119,8 @@ export default function NftDetail() {
                 <p className="description">{data?.desc}</p>
               </div>
 
+
+
               <div className="wrap-button">
                 <div className="price">
                   <div className="left-side">
@@ -148,6 +149,7 @@ export default function NftDetail() {
           </div>
         </div>
       </div>
+      {isShowNoti && <CommingSoon setTurnOff={_handleTurnOffNoti} />}
     </main>
   );
 }

@@ -617,7 +617,7 @@ footer {
 .portforlio .token-list .side .detail .label {
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: flex-start;
   font-size: 14px;
   margin-top: 24px;
   margin-bottom: 24px;
@@ -635,11 +635,12 @@ footer {
 }
 .portforlio .token-list .wrap-info .arrow-down {
   position: absolute;
-  bottom: 0;
+  bottom: 14px;
   left: 50%;
+  transform: translateX(-50%);
 }
 .portforlio .token-list .wrap-info .arrow-down.active {
-  transform: rotate(180deg);
+  transform: translateX(-50%) rotate(180deg);
 }
 .portforlio .token-list .wrap-info .label.label__token__detail {
   display: none;
@@ -1275,12 +1276,12 @@ footer {
   top: 45%;
   left: 50%;
   transform: translate(-50%, -50%);
-  background: #341d73;
+  background: var(--origin-black);
   min-width: 400px;
   min-height: 520px;
   border-bottom-left-radius: 10px;
   border-bottom-right-radius: 10px;
-  border-top: 5px solid #462893;
+  border-top: 5px solid var(--white);
   overflow: hidden;
   /* padding: 14px; */
   animation: popup 0.1s ease;
@@ -1585,7 +1586,7 @@ footer {
 }
 
 .Wave {
-  width: 6440px;
+  width: 6800px;
   animation-name: swell;
   animation-duration: 2s;
   animation-fill-mode: forwards;
@@ -1803,6 +1804,7 @@ footer {
 }
 
 .button-basic {
+  cursor: pointer;
   pointer-events: all;
   padding: 4px;
   background: transparent;

@@ -26,13 +26,14 @@ const Deposit = ({ togglePopup, token }: Props) => {
   const [shares, setShares] = useState(0);
   const [error, setError] = useState("");
   const [isCollateral, setIsCollateral] = useState(false);
-
+  
   const tokenConfig = token && tokenFomat[token?.tokenId];
   const icon = tokenConfig && tokenConfig?.icon;
   const tokenName = tokenConfig && tokenConfig?.name;
+  const tokenNameUsd = tokenConfig && tokenConfig?.nameUsd;
   const tokenDecimals = tokenConfig && tokenConfig?.decimals;
   const tokenSymbol = tokenConfig && tokenConfig?.symbol;
-  const priceUsd = (usdTokensState && usdTokensState[tokenName]?.usd) ?? 23;
+  const priceUsd = (usdTokensState && usdTokensState[tokenNameUsd]?.usd) ?? 1;
   const marks = {
     0: "0%",
     25: "25%",
@@ -58,7 +59,7 @@ const Deposit = ({ togglePopup, token }: Props) => {
     } else if (amountToken > userTokenBalance) {
       return setError(`The token you have lower than value that you deposit`);
     } else if (amountToken < 0) {
-      return setError(`You can not deposit with Negative number`);
+      return setError(`You can not use Negative number`);
     }
     return handleDeposit(token, amountToken, contractState, isCollateral);
   };
@@ -83,7 +84,7 @@ const Deposit = ({ togglePopup, token }: Props) => {
             account_id: walletState.getAccountId(),
           }
         );
-        setUserTokenBalance(balance / 10 ** token.config.extra_decimals);
+        setUserTokenBalance(balance / 10 ** tokenDecimals);
       } catch (err) {
         console.log(err);
       }

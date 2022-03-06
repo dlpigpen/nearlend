@@ -12,7 +12,7 @@ export DAI_TOKEN_ID=dai.fakes.testnet
 export USDT_TOKEN_ID=usdt.fakes.testnet
 export USDC_TOKEN_ID=usdc.testnet
 
-export AURORAX_TOKEN_ID_2=aurorax.testnet
+export AURORAX_TOKEN_ID=aurorax.testnet
 export AURORAX_TOKEN_ID=auroraf.token-factory.tokenhub.testnet
 export NEL_TOKEN_ID=neltest.token-factory.tokenhub.testnet
 

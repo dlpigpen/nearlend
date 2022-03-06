@@ -4,7 +4,12 @@ import { tokenFomat } from "../utils/token";
 import { useState as hookState, Downgraded } from "@hookstate/core";
 import globalState from "../state/globalStore";
 
-function TokenList({ tokenList, _openPopupDeposit, _openPopupBorrow, _handleTogglePopupRequire }: any) {
+function TokenList({
+  tokenList,
+  _openPopupDeposit,
+  _openPopupBorrow,
+  _handleTogglePopupRequire,
+}: any) {
   const { usdTokens }: any = hookState<any>(globalState);
   const usdTokensState = usdTokens.attach(Downgraded).get();
 
@@ -16,9 +21,9 @@ function TokenList({ tokenList, _openPopupDeposit, _openPopupBorrow, _handleTogg
     _openPopupBorrow(e, item);
   };
 
-  const _handleClaimTokens = (item:any) => {
-    _handleTogglePopupRequire(item)
-  }
+  const _handleClaimTokens = (item: any) => {
+    _handleTogglePopupRequire(item);
+  };
 
   return (
     <>
@@ -28,14 +33,18 @@ function TokenList({ tokenList, _openPopupDeposit, _openPopupBorrow, _handleTogg
             const icon = tokenFomat[tokenId.toString()]?.icon;
             const tokenSymbol = tokenFomat[tokenId.toString()]?.symbol;
             const tokenName = tokenFomat[tokenId.toString()]?.name;
-            const priceUsd = usdTokensState && (usdTokensState[tokenName]?.usd ?? 23);
+            const tokenNameUsd = tokenFomat[tokenId.toString()]?.nameUsd;
+            const tokenDecimals = tokenFomat[tokenId.toString()]?.decimals;
+            const priceUsd =
+              usdTokensState && (usdTokensState[tokenNameUsd]?.usd ?? 1);
+
             const supplied: any = fomatBalanceWithDecimal(
               item?.supplied.balance,
-              item.config.extra_decimals
+              tokenDecimals
             );
             const borrowed: any = fomatBalanceWithDecimal(
               item?.borrowed.balance,
-              item.config.extra_decimals
+              tokenDecimals
             );
 
             return (
@@ -52,18 +61,25 @@ function TokenList({ tokenList, _openPopupDeposit, _openPopupBorrow, _handleTogg
                     <p className="top coin color-white fwb">{tokenSymbol}</p>
                     <p className="color-space-gray">${priceUsd?.toFixed(1)}</p>
                   </div>
-                  <div className="btn-claim" onClick={()=>_handleClaimTokens(item)}>
+                  <div
+                    className="btn-claim"
+                    onClick={() => _handleClaimTokens(item)}
+                  >
                     <button className="button-basic">Claim</button>
                   </div>
                 </div>
                 <div className="mini deposit">
                   <p className="top color-white fwb">{supplied}</p>
-                  <p className="color-space-gray">${(supplied * +priceUsd).toFixed(1)}</p>
+                  <p className="color-space-gray">
+                    ${(supplied * +priceUsd).toFixed(1)}
+                  </p>
                 </div>
-                
+
                 <div className="mini deposit on-desktop">
                   <p className="top color-white fwb">{borrowed}</p>
-                  <p className="color-space-gray">${(borrowed * +priceUsd).toFixed(1)}</p>
+                  <p className="color-space-gray">
+                    ${(borrowed * +priceUsd).toFixed(1)}
+                  </p>
                 </div>
                 <div
                   onClick={(e) => openPopupDeposit(e, item)}

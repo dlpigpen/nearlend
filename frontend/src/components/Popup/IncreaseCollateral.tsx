@@ -1,41 +1,32 @@
 import { useEffect, useState } from "react";
 import iconClose from "../../images/icon-close.png";
 import { InputNumber, Slider } from "antd";
-import { shortBalance, shortName, totalBalance } from "../../utils";
+import { shortBalance, totalBalance } from "../../utils";
 import { useState as hookState, Downgraded } from "@hookstate/core";
 import globalState from "../../state/globalStore";
 import { tokenFomat } from "../../utils/token";
-import { handleDeposit } from "../../services/connect";
-import { Switch } from "antd";
 import { getUsdtOfToken } from "../../services";
+import { handleIncreaseCollateral } from "../../services/connect";
 
 type Props = {
   togglePopup: () => void;
-  listCollateral: any;
   token: any;
 };
-const IncreaseCollateral = ({ togglePopup, listCollateral, token }: Props) => {
+const IncreaseCollateral = ({ togglePopup, token }: Props) => {
   const { contract, wallet, usdTokens, userBalance }: any =
     hookState<any>(globalState);
   const contractState = contract.attach(Downgraded).get();
-  const walletState = wallet.attach(Downgraded).get();
   const usdTokensState = usdTokens.attach(Downgraded).get();
   const userBalanceState = userBalance.attach(Downgraded).get();
   const [amountToken, setAmountToken] = useState(0);
   const [amountTokenPercent, setAmountTokenPercent] = useState(0);
   const [limitToken, setLimitToken] = useState(0);
-  const [usd, setUsd] = useState(0);
-  const [shares, setShares] = useState(0);
+
   const [error, setError] = useState("");
-  const [isCollateral, setIsCollateral] = useState(false);
+
 
   const collateral = userBalanceState?.collateral;
-  // console.log("listCollateral in popup", listCollateral);
-
   const depositBalance = token?.balance;
-
-  // console.log("usd", usd);
-  // console.log("usdTokensState", usdTokensState);
   const tokenId = token?.tokenId || token?.token_id;
   const tokenConfig = token && tokenFomat[tokenId];
   const icon = tokenConfig && tokenConfig?.icon;
@@ -52,10 +43,6 @@ const IncreaseCollateral = ({ togglePopup, listCollateral, token }: Props) => {
     100: "100%",
   };
 
-  function _onChangeCollateral(checked: boolean) {
-    setIsCollateral(checked);
-  }
-
   // should debounce
   function formatter(value: any) {
     return `${value.toString()}%`;
@@ -68,8 +55,10 @@ const IncreaseCollateral = ({ togglePopup, listCollateral, token }: Props) => {
       return setError(`You have to Enter amount of Tokens`);
     } else if (amountToken > limitToken) {
       return setError(`Allow equal or lower value that you deposited`);
+    } else if (amountToken < 0) {
+      return setError(`You can not use Negative number`);
     }
-    // return handleDeposit(token, amountToken, contractState, isCollateral);
+    return handleIncreaseCollateral(token, amountToken, contractState);
   };
 
   const onChange = (e: any) => {
@@ -95,15 +84,7 @@ const IncreaseCollateral = ({ togglePopup, listCollateral, token }: Props) => {
   }, [limitToken]);
 
   useEffect(() => {
-    console.log("collateralcollateral", collateral);
-    console.log("usdTokensStateusdTokensState", usdTokensState);
-
-    const collateral__To__USDT = totalBalance(collateral, usdTokensState);
-    console.log("collateralTo__USDT", collateral__To__USDT);
-  }, [collateral, userBalanceState]);
-
-  useEffect(() => {
-    const fomatDepositBalance = depositBalance / (10 **tokenDecimals);
+    const fomatDepositBalance = depositBalance / 10 ** tokenDecimals;
     setLimitToken(fomatDepositBalance);
     async function initGetUSDPrice() {
       const res = await getUsdtOfToken();
@@ -192,11 +173,11 @@ const IncreaseCollateral = ({ togglePopup, listCollateral, token }: Props) => {
           </div>
 
           <p className="position-relative total bg-white">
-            Total Supply <span style={{ fontSize: 22 }}>&#8771;</span> $
+            Total Increase <span style={{ fontSize: 22 }}>&#8771;</span> $
             {shortBalance(amountToken * priceUsd)}
           </p>
           <p className="position-relative rates-title fwb bg-white pad-side-14">
-            Supply Rates
+            Increase Rates
           </p>
           <div className="position-relative flex bg-white pad-side-14">
             <div className="left">Deposit APY</div>
@@ -206,20 +187,20 @@ const IncreaseCollateral = ({ togglePopup, listCollateral, token }: Props) => {
             <div className="left">Collateral Factor</div>
             <div className="right fwb">60%</div>
           </div>
-          <div className="position-relative flex bg-white pad-side-14">
+          {/* <div className="position-relative flex bg-white pad-side-14">
             <div className="left">Use as Collateral</div>
             <div className="right fwb">
               <label className="switch">
                 <Switch defaultChecked={false} onChange={_onChangeCollateral} />
               </label>
             </div>
-          </div>
+          </div> */}
           {error && <p className="text-error">* {error}</p>}
           <button
             className="position-relative btn"
             onClick={_handleIncreaseCollateral}
           >
-            Collateral
+            Increase
           </button>
         </div>
       </div>

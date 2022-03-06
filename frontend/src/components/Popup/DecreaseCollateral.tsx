@@ -2,40 +2,37 @@ import { useEffect, useState } from "react";
 import iconShib from "../../images/icon-shib.png";
 import iconClose from "../../images/icon-close.png";
 import { InputNumber, Slider } from "antd";
-import { shortBalance, totalBalanceMaxBorrow } from "../../utils";
+import { shortName, shortBalance } from "../../utils";
 import { useState as hookState, Downgraded } from "@hookstate/core";
 import globalState from "../../state/globalStore";
 import { tokenFomat } from "../../utils/token";
-import { handleBorrow } from "../../services/connect";
-import { getUsdtOfToken } from "../../services";
+import { handleDecreaseCollateral } from "../../services/connect";
 
 type Props = {
-  togglePopup: Function;
+  togglePopup: () => void;
   tokenId?: string;
   token: any;
 };
 const Borrow = ({ togglePopup, token }: Props) => {
-  const { contract, wallet, usdTokens, userBalance, poolListToken }: any =
-    hookState<any>(globalState);
+  const { contract, usdTokens, userBalance }: any = hookState<any>(globalState);
   const contractState = contract.attach(Downgraded).get();
-  const poolListTokenState = poolListToken.attach(Downgraded).get();
   const usdTokensState = usdTokens.attach(Downgraded).get();
   const userBalanceState = userBalance.attach(Downgraded).get();
   const [amountToken, setAmountToken] = useState(0);
   const [amountTokenPercent, setAmountTokenPercent] = useState(0);
+  const [tokenLimit, setTokenLimit] = useState(0);
   const [collateral, setCollatertal] = useState(0);
-  const [available, setAvailable] = useState<any>(0);
-  const [tokenUsd, setTokenUsd] = useState(0);
-  const [totalUsd, setTotalUsd] = useState<any>(0);
+  const [available, setAvailable] = useState(0);
   const [error, setError] = useState("");
+
   const tokenId = token.tokenId || token.token_id;
   const tokenConfig = tokenFomat[tokenId];
   const icon = tokenConfig?.icon;
   const tokenName = tokenConfig?.name;
-  const tokenNameUsd = tokenConfig?.nameUsd;
   const tokenDecimals = tokenConfig?.decimals;
   const tokenSymbol = tokenConfig && tokenConfig?.symbol;
-  const priceUsd = (usdTokensState && usdTokensState[tokenNameUsd]?.usd) ?? 23;
+  const priceUsd = (usdTokensState && usdTokensState[tokenName]?.usd) ?? 23;
+
   const marks = {
     0: "0%",
     25: "25%",
@@ -67,49 +64,21 @@ const Borrow = ({ togglePopup, token }: Props) => {
   }, []);
 
   useEffect(() => {
-    const collateral__To__USDT = totalBalanceMaxBorrow(
-      userBalanceState?.collateral,
-      usdTokensState,
-      poolListTokenState
-    );
-    const { usd } = usdTokensState[tokenConfig.nameUsd] ?? { usd: 0 };
-    setTokenUsd(usd);
-    setTotalUsd(collateral__To__USDT);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [collateral, userBalanceState, usdTokens]);
-
-  useEffect(() => {
-    if (totalUsd && tokenUsd) {
-      const available = totalUsd / tokenUsd;
-      setAvailable(available.toFixed(3));
-    }
-  }, [tokenUsd, totalUsd, available]);
-
-  useEffect(() => {
-    async function initGetUSDPrice() {
-      const res = await getUsdtOfToken();
-      if (res !== null) {
-        usdTokens.set(res);
-      }
-    }
-    const init = async () => await initGetUSDPrice();
-    const interval = setInterval(init, 10000);
-
-    //clean component
-    return () => {
-      clearInterval(interval);
-    };
-  }, []);
-
-  useEffect(() => {
     const foundCollateral =
       userBalanceState?.collateral?.find(
         (item: any) => item.token_id === tokenId
       )?.balance ?? 0;
+
     setCollatertal(foundCollateral);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const _handleBorrow = () => {
+  useEffect(() => {
+    setTokenLimit(Math.abs(collateral) / 10 ** tokenDecimals);
+    setAvailable(Math.abs(collateral) / 10 ** tokenDecimals);
+  }, [collateral, tokenDecimals]);
+
+  const _handleDecreaseCollateral = () => {
     if (available === 0) {
       return setError(`You need to deposit before borrow`);
     } else if (amountToken === 0 || amountToken === null) {
@@ -118,26 +87,24 @@ const Borrow = ({ togglePopup, token }: Props) => {
       return setError(`You out of Limits Available`);
     } else if (amountToken < 0) {
       return setError(`You can not borrow with Negative number`);
-    } else if (amountToken < 0) {
-      return setError(`You can not use Negative number`);
     }
-    return handleBorrow(token, amountToken, contractState);
+    return handleDecreaseCollateral(token, amountToken, contractState);
   };
 
   const onChange = (e: any) => {
     setAmountToken(e);
-    setAmountTokenPercent((e / available) * 100);
+    setAmountTokenPercent((e / tokenLimit) * 100);
   };
 
   const sliderOnChange = (e: any) => {
-    setAmountToken((e / 100) * available);
+    setAmountToken((e / 100) * tokenLimit);
     setAmountTokenPercent(e);
   };
 
   return (
     <div className="wrap-popup">
       <div className="popup">
-        <p className="icon-close" onClick={() => togglePopup()}>
+        <p className="icon-close" onClick={togglePopup}>
           <img alt="icon-close" src={iconClose} width={12} height={12} />
         </p>
         <div className="Ocean">
@@ -159,7 +126,7 @@ const Borrow = ({ togglePopup, token }: Props) => {
             </path>
           </svg>
         </div>
-        <h4 className="title">Borrow</h4>
+        <h4 className="title">Decrease</h4>
         <p className="icon">
           <img className="icon" src={icon} width={54} height={54} alt="Logo" />
         </p>
@@ -174,7 +141,7 @@ const Borrow = ({ togglePopup, token }: Props) => {
               </span>
               <br />
               ($
-              {shortBalance(totalUsd)})
+              {shortBalance(+available * priceUsd)})
             </p>
             <p className="tar">
               1 {tokenSymbol} = ${shortBalance(priceUsd)}
@@ -211,11 +178,11 @@ const Borrow = ({ togglePopup, token }: Props) => {
           </div>
 
           <p className="position-relative total bg-white">
-            Total Borrow <span style={{ fontSize: 22 }}>&#8771;</span> $
+            Total Decrease <span style={{ fontSize: 22 }}>&#8771;</span> $
             {shortBalance(amountToken * priceUsd)}
           </p>
           <p className="position-relative rates-title fwb bg-white pad-side-14">
-            Borrow Rates
+            Decrease Rates
           </p>
           <div className="position-relative flex bg-white pad-side-14">
             <div className="left">Borrow APY</div>
@@ -226,8 +193,11 @@ const Borrow = ({ togglePopup, token }: Props) => {
             <div className="right fwb">60%</div>
           </div>
           {error && <p className="text-error">* {error}</p>}
-          <button className="position-relative btn" onClick={_handleBorrow}>
-            BORROW
+          <button
+            className="position-relative btn"
+            onClick={_handleDecreaseCollateral}
+          >
+            Decrease
           </button>
         </div>
       </div>
