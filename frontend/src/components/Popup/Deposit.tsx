@@ -86,7 +86,7 @@ const Deposit = ({ togglePopup, token }: Props) => {
         );
         setUserTokenBalance(balance / 10 ** tokenDecimals);
       } catch (err) {
-        console.log(err);
+        console.error(err);
       }
     };
     getBalanceTokenUser();

@@ -64,7 +64,7 @@ export const isUserRegistorToken = async (
       )
       .then((res: any) => res);
   } catch (err) {
-    console.log(err);
+    console.error(err);
   }
 };
 
@@ -81,7 +81,7 @@ export const claimFreeToken = async (
     };
     await contractState.account.functionCall(tokenId, "mint", args);
   } catch (err) {
-    console.log(err);
+    console.error(err);
   }
 };
 
@@ -99,7 +99,7 @@ export const handleRegistorToken = async (
       .functionCall(tokenId, "storage_deposit", args, GAS, ONE_OCTO_STRING)
       .then((res: any) => res);
   } catch (err) {
-    console.log(err);
+    console.error(err);
   }
 };
 

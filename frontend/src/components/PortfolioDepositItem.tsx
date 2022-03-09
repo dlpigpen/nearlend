@@ -62,7 +62,7 @@ export default function PortfolioDepositItem({ itemToken }: any) {
         );
         setUserTokenBalance(balance);
       } catch (err) {
-        console.log(err);
+        console.error(err);
       }
     };
     getBalanceTokenUser();

@@ -1085,6 +1085,91 @@ footer {
   overflow-y: scroll;
 }
 
+.nft-detail .wrap-comtfee {
+  padding-top: 45px;
+  padding-bottom: 40px;
+}
+.nft-detail .comtfee-item {
+  border-bottom: 1px solid #fff;
+  padding-bottom: 10px;
+  margin-bottom: 20px;
+}
+
+.nft-detail .comtfee-info {
+  display: flex;
+  justify-items: center;
+  align-items: center;
+}
+.nft-detail .comtfee-avatar {
+  width: 46px;
+  height: 46px;
+  overflow: hidden;
+  border-radius: 50%;
+  border: 1px solid var(--greenlight);
+  position: relative;
+  top: 10px;
+}
+.nft-detail .comtfee-avatar img {
+  object-fit: cover;
+  width: 46px;
+  height: 46px;
+}
+.nft-detail .comtfee-name {
+  font-size: 17px;
+  margin: 0 8px;
+}
+.nft-detail .comtfee-tranfer {
+  font-size: 17px;
+  font-style: italic;
+  color: gray;
+}
+.nft-detail .comtfee {
+  position: relative;
+  margin-bottom: 20px;
+}
+
+.nft-detail .comtfee .button {
+}
+.nft-detail .comtfee .ant-input:focus,
+.nft-detail .comtfee .ant-input-focused {
+  border-color: var(--greenlight);
+  box-shadow: unset;
+  padding: 10px;
+}
+.nft-detail .comtfee .comtfee-input {
+  background: none;
+  border-top: none;
+  border-left: none;
+  border-right: none;
+  border-bottom: 1px solid gray !important;
+  margin-bottom: 55px;
+  color: var(--white);
+}
+
+.nft-detail .comtfee-button {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+}
+.nft-detail .comtfee-button button {
+  padding: 6px 14px;
+}
+.nft-detail .comtfee-tooltip {
+  font-size: 19px;
+  margin-right: 10px;
+}
+.nft-detail .comtfee-tranfer .comtfee-txt-normal {
+  font-style: normal;
+  color: var(--white);
+}
+.nft-detail .comtfee-text {
+  padding-bottom: 10px;
+  margin-top: -3px;
+  margin-left: 67px;
+}
+
 @media screen and (max-width: 1400px) {
   .nft-detail .nft-info .container {
     margin: 0 40px;
