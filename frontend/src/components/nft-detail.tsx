@@ -12,7 +12,8 @@ import {
   ShareAltOutlined,
   SwapLeftOutlined,
 } from "@ant-design/icons";
-
+import { Input, Tooltip } from "antd";
+import { QuestionCircleOutlined } from "@ant-design/icons";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import CommingSoon from "./Popup/CommingSoon";
@@ -39,7 +40,6 @@ export default function NftDetail() {
 
   return (
     <main className="nft-detail">
-      {isShowNoti && <CommingSoon setTurnOff={_handleTurnOffNoti} />}
       <div className="wrap-body">
         <div className="nft-info">
           <div className="container">
@@ -142,12 +142,65 @@ export default function NftDetail() {
                     <span className="token-usd">150k usd</span>
                   </div>
                 </div>
-                <button className="button" onClick={() => setIsShowNoti(true)}>Buy</button>
+                <button className="button" onClick={() => setIsShowNoti(true)}>
+                  Buy
+                </button>
+              </div>
+            </div>
+          </div>
+          <div className="container">
+            <div className="wrap-comtfee">
+              <div className="comtfee">
+                <Input
+                  className="comtfee-input"
+                  placeholder="Write your comtfee..."
+                />
+                <div className="comtfee-button">
+                  <Tooltip
+                    className="comtfee-tooltip"
+                    color={"#2196f3"}
+                    title={"Comtfee - comment with fee, to show your love with the Creator NFT !"}
+                  >
+                    <QuestionCircleOutlined />
+                  </Tooltip>
+                  <button className="button-basic">Comtfee</button>
+                </div>
+              </div>
+              <div className="comtfee-item">
+                <div className="comtfee-info">
+                  <p className="comtfee-avatar">
+                    <img src={nft_car} alt={nft_car} />
+                  </p>
+                  <p className="comtfee-name"> Charlie Cameo </p>
+                  <p className="comtfee-tranfer">
+                    has donate 4 NEAR for{" "}
+                    <span className="comtfee-txt-normal">{data?.creator}</span>
+                  </p>
+                </div>
+                <p className="comtfee-text">
+                  🤩 🤩 🤩 Your work like a charm !{" "}
+                </p>
+              </div>
+              <div className="comtfee-item">
+                <div className="comtfee-info">
+                  <p className="comtfee-avatar">
+                    <img src={nft_flow} alt={nft_flow} />
+                  </p>
+                  <p className="comtfee-name"> Hold to the m00n </p>
+                  <p className="comtfee-tranfer">
+                    has donate 0.4 NEL for{" "}
+                    <span className="comtfee-txt-normal">{data?.creator}</span>
+                  </p>
+                </div>
+                <p className="comtfee-text">
+                  Everything would be better if more people were like you. ❤️
+                </p>
               </div>
             </div>
           </div>
         </div>
       </div>
+      {isShowNoti && <CommingSoon setTurnOff={_handleTurnOffNoti} />}
     </main>
   );
 }

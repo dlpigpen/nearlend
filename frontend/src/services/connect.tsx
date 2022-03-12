@@ -1,5 +1,6 @@
 import * as nearAPI from "near-api-js";
 import { contractName, nearConfig } from "../utils";
+import { tokenFomat } from "../utils/token";
 const { connect, WalletConnection, keyStores } = nearAPI;
 const keyStore = new keyStores.BrowserLocalStorageKeyStore();
 export const GAS = 200000000000000;
@@ -45,6 +46,63 @@ export const checkIsSigned = async function (wallet: any) {
   }
 };
 
+export const isUserRegistorToken = async (
+  contractState: any,
+  walletState: any,
+  tokenId: string
+) => {
+  try {
+    await contractState.account
+      .viewFunction(
+        tokenId,
+        "storage_balance_of",
+        {
+          account_id: walletState.getAccountId(),
+        },
+        GAS,
+        ONE_OCTO
+      )
+      .then((res: any) => res);
+  } catch (err) {
+    console.error(err);
+  }
+};
+
+export const claimFreeToken = async (
+  contractState: any,
+  walletState: any,
+  amout: number,
+  tokenId: string
+) => {
+  try {
+    const args = {
+      account_id: walletState.getAccountId(),
+      amount: amout.toLocaleString("fullwide", { useGrouping: false }),
+    };
+    await contractState.account.functionCall(tokenId, "mint", args);
+  } catch (err) {
+    console.error(err);
+  }
+};
+
+export const handleRegistorToken = async (
+  contractState: any,
+  walletState: any,
+  tokenId: string
+) => {
+  try {
+    const args = {
+      account_id: walletState.getAccountId(),
+      registration_only: true,
+    };
+    await contractState.account
+      .functionCall(tokenId, "storage_deposit", args, GAS, ONE_OCTO_STRING)
+      .then((res: any) => res);
+  } catch (err) {
+    console.error(err);
+  }
+};
+
 export const handleDepositFirstTime = async function (
   contract: any,
   wallet: any
@@ -67,19 +125,20 @@ export const handleDeposit = async function (
   isCollateral: boolean
 ) {
   try {
-    const amount = amountToken * 10 ** token.config.extra_decimals;
-    if (amount < 0) return console.log("cannot deposit");
+    const tokenID = token.tokenId || token.token_id;
+    const tokenConfig = tokenFomat[tokenID];
+    const amount = amountToken * 10 ** tokenConfig.decimals;
+    let amountToString = amount.toLocaleString("fullwide", {
+      useGrouping: false,
+    });
     const contractID = contract.contractId;
-    const tokenID = token.tokenId;
+
     const msg = isCollateral
-      ? `{"Execute": {"actions": [{"IncreaseCollateral": {"token_id": "${tokenID}", "amount": "${amount.toLocaleString(
-          "fullwide",
-          { useGrouping: false }
-        )}"}}]}}`
+      ? `{"Execute": {"actions": [{"IncreaseCollateral": {"token_id": "${tokenID}", "amount": "${amountToString}"}}]}}`
       : "";
     const args = {
       receiver_id: contractID,
-      amount: amount.toLocaleString("fullwide", { useGrouping: false }),
+      amount: amountToString,
       msg,
     };
 
@@ -101,29 +160,136 @@ export const handleBorrow = async function (
   contract: any
 ) {
   try {
-    const decimals = 10 ** token.config.extra_decimals;
-    const amount = amountToken * decimals;
+    const tokenID = token.tokenId || token.token_id;
+    const tokenConfig = tokenFomat[tokenID];
+    const amount = amountToken * 10 ** tokenConfig.decimals;
     let amountToString = amount.toLocaleString("fullwide", {
       useGrouping: false,
     });
-
     const contractID = contract.contractId;
-    const tokenID = token.tokenId;
     const args = {
       receiver_id: contractID,
-      amount: "1",
+      asset_ids: ["usdt.fakes.testnet", tokenID],
       msg: `{"Execute": {"actions": [{"Borrow": {"token_id": "${tokenID}", "amount": "${amountToString}"}}]}}`,
     };
 
     return await contract.account.functionCall(
-      tokenID,
-      "ft_transfer_call",
+      "priceoracle.testnet",
+      "oracle_call",
       args,
       GAS,
       ONE_OCTO
     );
   } catch (error) {
-    console.log(error);
+    console.error(error);
+  }
+};
+
+export const handleWithdraw = async function (
+  token: any,
+  amountToken: number,
+  contract: any
+) {
+  try {
+    const tokenID = token.tokenId || token.token_id;
+    const tokenConfig = tokenFomat[tokenID];
+    const amount = amountToken * 10 ** tokenConfig.decimals;
+    let amountToString = amount.toLocaleString("fullwide", {
+      useGrouping: false,
+    });
+    const contractID = contract.contractId;
+    const args = {
+      actions: [
+        {
+          Withdraw: {
+            token_id: tokenID,
+            amount: amountToString,
+          },
+        },
+      ],
+    };
+
+    return await contract.account.functionCall(
+      contractID,
+      "execute",
+      args,
+      GAS,
+      ONE_OCTO
+    );
+  } catch (error) {
+    console.error(error);
+  }
+};
+
+export const handleDecreaseCollateral = async function (
+  token: any,
+  amountToken: number,
+  contract: any
+) {
+  try {
+    const tokenID = token.tokenId || token.token_id;
+    const tokenConfig = tokenFomat[tokenID];
+    const amount = amountToken * 10 ** tokenConfig.decimals;
+    let amountToString = amount.toLocaleString("fullwide", {
+      useGrouping: false,
+    });
+    const contractID = contract.contractId;
+    const args = {
+      actions: [
+        {
+          DecreaseCollateral: {
+            token_id: tokenID,
+            amount: amountToString,
+          },
+        },
+      ],
+    };
+
+    return await contract.account.functionCall(
+      contractID,
+      "execute",
+      args,
+      GAS,
+      ONE_OCTO
+    );
+  } catch (error) {
+    console.error(error);
+  }
+};
+
+export const handleIncreaseCollateral = async function (
+  token: any,
+  amountToken: number,
+  contract: any
+) {
+  try {
+    const tokenID = token.tokenId || token.token_id;
+    const tokenConfig = tokenFomat[tokenID];
+    const amount = amountToken * 10 ** tokenConfig.decimals;
+    let amountToString = amount.toLocaleString("fullwide", {
+      useGrouping: false,
+    });
+    const contractID = contract.contractId;
+    const args = {
+      actions: [
+        {
+          IncreaseCollateral: {
+            token_id: tokenID,
+            amount: amountToString,
+          },
+        },
+      ],
+    };
+
+    return await contract.account.functionCall(
+      contractID,
+      "execute",
+      args,
+      GAS,
+      ONE_OCTO
+    );
+  } catch (error) {
+    console.error(error);
   }
 };
 

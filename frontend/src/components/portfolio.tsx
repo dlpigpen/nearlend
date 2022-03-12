@@ -1,7 +1,7 @@
 import { useState as hookState, Downgraded } from "@hookstate/core";
 import globalState from "../state/globalStore";
 import { useEffect, useState } from "react";
-import { totalBalance } from "../utils";
+import { shortBalance, totalBalance } from "../utils";
 import PortfolioDeposit from "./PortfolioDeposit";
 import PortfolioBorrow from "./PortfolioBorrow";
 
@@ -17,11 +17,6 @@ export default function Portfolio() {
     }, 500);
   }, [userBalanceState]);
 
-  const _handToggleDiv = (e: any) => {
-    e.preventDefault();
-    e.target.classList.toggle("active");
-  };
-
   return (
     <main className="container portforlio homepage">
       <div className="total">
@@ -29,7 +24,7 @@ export default function Portfolio() {
           <div className="total deposit">
             <p className="title">My Total Deposits</p>
             <p className="value">
-              ${totalBalance(account?.supplied, usdTokensState)}
+              ${shortBalance(totalBalance(account?.supplied, usdTokensState))}
             </p>
           </div>
           <div className="total deposit">
@@ -39,7 +34,7 @@ export default function Portfolio() {
           <div className="total borrow">
             <p className="title">My Total Borrows</p>
             <p className="value">
-              ${totalBalance(account?.borrowed, usdTokensState)}
+              ${shortBalance(totalBalance(account?.borrowed, usdTokensState))}
             </p>
           </div>
         </div>
@@ -49,7 +44,9 @@ export default function Portfolio() {
         <div className="side">
           <div className="my-info">
             <h5>Deposited</h5>
-            <h5>${totalBalance(account?.supplied, usdTokensState)}</h5>
+            <h5>
+              ${shortBalance(totalBalance(account?.supplied, usdTokensState))}
+            </h5>
           </div>
           <div className="detail">
             <div className="label">
@@ -60,13 +57,16 @@ export default function Portfolio() {
             <PortfolioDeposit
               supplied={account?.supplied}
               borrowed={account?.borrowed}
+              collateral={account?.collateral}
             />
           </div>
         </div>
         <div className="side">
           <div className="my-info">
             <h5>Borrowed</h5>
-            <h5>${totalBalance(account?.borrowed, usdTokensState)}</h5>
+            <h5>
+              ${shortBalance(totalBalance(account?.borrowed, usdTokensState))}
+            </h5>
           </div>
           <div className="detail">
             <div className="label">

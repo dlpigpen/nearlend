@@ -152,6 +152,7 @@ export default function Header() {
         </div>}
         {/* {!isMobile && ( */}
           <nav className={isMenuOpen ? 'active' : ''}>
+            {console.log('aaaaaa')}
             <ul>
               <li onClick={handleClickMenuItem}>
                 <Link to="/">Home</Link>

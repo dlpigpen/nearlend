@@ -5,11 +5,8 @@ import { useState } from "react";
 import { Downgraded, useHookstate } from "@hookstate/core";
 import globalState from "../state/globalStore";
 
-export default function PortfolioBorrowItem({
-  borrowed,
-  supplied,
-}: any) {
-  const { contract, wallet, usdTokens, userBalance }: any =
+export default function PortfolioBorrowItem({ borrowed, supplied }: any) {
+  const { userBalance }: any =
     useHookstate<any>(globalState);
   const userBalanceState = userBalance.attach(Downgraded).get();
   const [isShowDetail, setIsShowDetail] = useState(false);
@@ -43,20 +40,20 @@ export default function PortfolioBorrowItem({
         <p className="label__token-mini">
           {(Number(borrowed.apr) * 100).toFixed(3)}%
         </p>
-        <button className="button-basic">Withdraw</button>
+        <button className="button-basic">Borrow</button>
       </div>
       {isShowDetail && (
         <div className="label label__token__detail">
           <div className="token__detail__row">
-            <p className="title">Borrowed:</p>
-            <p className="label__token-mini">
-              {fomatBalanceWithDecimal(borrowedBalance, decimals)}
-            </p>
-          </div>
-          <div className="token__detail__row">
             <p className="title">Available:</p>
             <p className="label__token-mini">
               {fomatBalanceWithDecimal(collateral, decimals)}
+            </p>
+          </div>
+          <div className="token__detail__row">
+            <p className="title">Borrowed:</p>
+            <p className="label__token-mini">
+              {fomatBalanceWithDecimal(borrowedBalance, decimals)}
             </p>
           </div>
         </div>

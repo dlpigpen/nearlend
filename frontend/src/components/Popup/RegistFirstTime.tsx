@@ -1,11 +1,5 @@
-import { useEffect, useState } from "react";
-import iconShib from "../../images/icon-shib.png";
-import iconClose from "../../images/icon-close.png";
-import { InputNumber, Slider } from "antd";
-import { shortName } from "../../utils";
 import { useState as hookState, Downgraded } from "@hookstate/core";
 import globalState from "../../state/globalStore";
-import { tokenFomat } from "../../utils/token";
 import { handleDepositFirstTime } from "../../services/connect";
 
 type Props = {

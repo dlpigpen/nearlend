@@ -2,11 +2,12 @@ import { useEffect, useState } from "react";
 import iconShib from "../../images/icon-shib.png";
 import iconClose from "../../images/icon-close.png";
 import { InputNumber, Slider } from "antd";
-import { shortName, shortBalance } from "../../utils";
+import { shortBalance, totalBalanceMaxBorrow } from "../../utils";
 import { useState as hookState, Downgraded } from "@hookstate/core";
 import globalState from "../../state/globalStore";
 import { tokenFomat } from "../../utils/token";
 import { handleBorrow } from "../../services/connect";
+import { getUsdtOfToken } from "../../services";
 
 type Props = {
   togglePopup: Function;
@@ -14,26 +15,27 @@ type Props = {
   token: any;
 };
 const Borrow = ({ togglePopup, token }: Props) => {
-  const { contract, wallet, usdTokens, userBalance }: any =
+  const { contract, wallet, usdTokens, userBalance, poolListToken }: any =
     hookState<any>(globalState);
   const contractState = contract.attach(Downgraded).get();
-  const walletState = wallet.attach(Downgraded).get();
+  const poolListTokenState = poolListToken.attach(Downgraded).get();
   const usdTokensState = usdTokens.attach(Downgraded).get();
   const userBalanceState = userBalance.attach(Downgraded).get();
   const [amountToken, setAmountToken] = useState(0);
   const [amountTokenPercent, setAmountTokenPercent] = useState(0);
-  const [tokenLimit, setTokenLimit] = useState(0);
-  const [shares, setShares] = useState(0);
-  const [available, setAvailable] = useState(0);
+  const [collateral, setCollatertal] = useState(0);
+  const [available, setAvailable] = useState<any>(0);
+  const [tokenUsd, setTokenUsd] = useState(0);
+  const [totalUsd, setTotalUsd] = useState<any>(0);
   const [error, setError] = useState("");
-
   const tokenId = token.tokenId || token.token_id;
   const tokenConfig = tokenFomat[tokenId];
   const icon = tokenConfig?.icon;
   const tokenName = tokenConfig?.name;
+  const tokenNameUsd = tokenConfig?.nameUsd;
   const tokenDecimals = tokenConfig?.decimals;
   const tokenSymbol = tokenConfig && tokenConfig?.symbol;
-  const priceUsd = (usdTokensState && usdTokensState[tokenName]?.usd) ?? 23;
+  const priceUsd = (usdTokensState && usdTokensState[tokenNameUsd]?.usd) ?? 23;
   const marks = {
     0: "0%",
     25: "25%",
@@ -41,12 +43,6 @@ const Borrow = ({ togglePopup, token }: Props) => {
     75: "75%",
     100: "100%",
   };
-
-  const collateral =
-    userBalanceState?.collateral?.find((item: any) => item.token_id === tokenId)
-      ?.balance ?? 0;
-  console.log("collateral", collateral);
-
   function formatter(value: any) {
     // console.log(value)
     return `${value.toString()}%`;
@@ -58,7 +54,6 @@ const Borrow = ({ togglePopup, token }: Props) => {
       const popupEle = window.document.getElementsByTagName("wrap-popup")[0];
       if (popupEle) {
         popupEle.addEventListener("click", () => {
-          // console.log("alo");
           togglePopup();
         });
       }
@@ -72,8 +67,46 @@ const Borrow = ({ togglePopup, token }: Props) => {
   }, []);
 
   useEffect(() => {
-    setTokenLimit(Math.abs(collateral) / 10 ** tokenDecimals);
-    setAvailable(Math.abs(collateral) / 10 ** tokenDecimals);
+    const collateral__To__USDT = totalBalanceMaxBorrow(
+      userBalanceState?.collateral,
+      usdTokensState,
+      poolListTokenState
+    );
+    const { usd } = usdTokensState[tokenConfig.nameUsd] ?? { usd: 0 };
+    setTokenUsd(usd);
+    setTotalUsd(collateral__To__USDT);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [collateral, userBalanceState, usdTokens]);
+
+  useEffect(() => {
+    if (totalUsd && tokenUsd) {
+      const available = totalUsd / tokenUsd;
+      setAvailable(available.toFixed(3));
+    }
+  }, [tokenUsd, totalUsd, available]);
+
+  useEffect(() => {
+    async function initGetUSDPrice() {
+      const res = await getUsdtOfToken();
+      if (res !== null) {
+        usdTokens.set(res);
+      }
+    }
+    const init = async () => await initGetUSDPrice();
+    const interval = setInterval(init, 10000);
+
+    //clean component
+    return () => {
+      clearInterval(interval);
+    };
+  }, []);
+
+  useEffect(() => {
+    const foundCollateral =
+      userBalanceState?.collateral?.find(
+        (item: any) => item.token_id === tokenId
+      )?.balance ?? 0;
+    setCollatertal(foundCollateral);
   }, []);
 
   const _handleBorrow = () => {
@@ -85,17 +118,19 @@ const Borrow = ({ togglePopup, token }: Props) => {
       return setError(`You out of Limits Available`);
     } else if (amountToken < 0) {
       return setError(`You can not borrow with Negative number`);
+    } else if (amountToken < 0) {
+      return setError(`You can not use Negative number`);
     }
     return handleBorrow(token, amountToken, contractState);
   };
 
   const onChange = (e: any) => {
     setAmountToken(e);
-    setAmountTokenPercent((e / tokenLimit) * 100);
+    setAmountTokenPercent((e / available) * 100);
   };
 
   const sliderOnChange = (e: any) => {
-    setAmountToken((e / 100) * tokenLimit);
+    setAmountToken((e / 100) * available);
     setAmountTokenPercent(e);
   };
 
@@ -139,7 +174,7 @@ const Borrow = ({ togglePopup, token }: Props) => {
               </span>
               <br />
               ($
-              {shortBalance(+available * priceUsd)})
+              {shortBalance(totalUsd)})
             </p>
             <p className="tar">
               1 {tokenSymbol} = ${shortBalance(priceUsd)}

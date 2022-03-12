@@ -1,5 +1,5 @@
 /* eslint-disable jsx-a11y/iframe-has-title */
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import "../App.css";
 import "../responsive.css";
 import { useState as hookState, Downgraded } from "@hookstate/core";
@@ -11,16 +11,20 @@ import {
   RequireLogin,
 } from "./Popup";
 import TokenList from "./token-list";
-import { GAS, ONE_OCTO, ONE_OCTO_STRING } from "../services/connect";
+import {
+  claimFreeToken,
+  handleRegistorToken,
+  isUserRegistorToken,
+} from "../services/connect";
+import { tokenFomat } from "../utils/token";
 
 function Home() {
-  const { contract, poolListToken, userBalance, isLogged }: any =
+  const { contract, poolListToken, userBalance, isLogged, wallet }: any =
     hookState<any>(globalState);
   const contractState = contract.attach(Downgraded).get();
+  const walletState = wallet.attach(Downgraded).get();
   const userBalanceState = userBalance.attach(Downgraded).get();
-  const poolListTokenState = poolListToken.attach(Downgraded).get();
   const isLoggedState = isLogged.attach(Downgraded).get();
-
   const [isShowPopupDeposit, setIsShowPopupDeposit] = useState(false);
   const [isShowPopupBorrow, setIsShowPopupBorrow] = useState(false);
   const [isShowPopupRegist, setIsShowPopupRegist] = useState(false);
@@ -28,8 +32,7 @@ function Home() {
   const [isShowPopupRequire, setIsShowPopupPopupRequire] = useState(false);
   const [tokenList, setTokenList] = useState([]);
   const [tokenId, setTokenId] = useState("");
-  const [tokenChose, setTokenChose] = useState(null);
-
+  const [tokenChose, setTokenChose]: any = useState(null);
   const [popupRequire, setPopupRequire] = useState({
     textTitle: "",
     textConfirm: "",
@@ -40,11 +43,10 @@ function Home() {
   const setUpPopup = (e: any, item: any) => {
     e.preventDefault();
     setTokenId(item.tokenId);
-    // console.log('item', item)
     setTokenChose(item);
   };
 
-  const openPopupDeposit = (e: any, item: any) => {
+  const openPopupDeposit = async (e: any, item: any) => {
     setUpPopup(e, item);
     handleValidate("deposit");
   };
@@ -69,12 +71,15 @@ function Home() {
   const _handleTogglePopupDeposit = () => {
     setIsShowPopupDeposit((prevState) => !prevState);
   };
+
   const _handleTogglePopupBorrow = () => {
     setIsShowPopupBorrow((prevState) => !prevState);
   };
+
   const _handleTogglePopupRegist = () => {
     setIsShowPopupRegist((prevState) => !prevState);
   };
+
   const _handleTogglePopupRequireLogin = () => {
     setPopupRequire({
       textTitle: "You need to Login to deposit or borrow !",
@@ -82,28 +87,15 @@ function Home() {
       textCancel: "Cancel",
       handleConfirm: () => {},
     });
-    setIsShowPopupRequireLogin((prevState) => !prevState);
+    setIsShowPopupRequireLogin((prev) => !prev);
   };
-  console.log(userBalanceState);
 
   const _handleTogglePopupRequire = async (item: any) => {
     setIsShowPopupPopupRequire((prevState) => !prevState);
-    console.log(item);
-    console.log("contractState", contractState);
     const tokenId = item?.tokenId || item?.token_id;
     if (!tokenId) return;
 
-    console.log("tokenId", tokenId);
-    const args = {
-      account_id: userBalanceState.account_id,
-    };
-
-    const checkIsUserRegistorToken = async () => {
-      return await contractState.account
-        .viewFunction(tokenId, "storage_balance_of", args, GAS, ONE_OCTO)
-        .then((res: any) => res);
-    };
-    const check = await checkIsUserRegistorToken();
+    const check = isUserRegistorToken(contractState, walletState, tokenId);
 
     if (check === null) {
       setPopupRequire({
@@ -125,51 +117,18 @@ function Home() {
   const _handleRegistorToken = async (item: any) => {
     const tokenId = item?.tokenId || item?.token_id;
     if (!tokenId) return;
-
-    console.log("tokenId", tokenId);
-    const args = {
-      account_id: userBalanceState.account_id,
-      registration_only: true,
-    };
-
-    const registor = async () => {
-      return await contractState.account
-        .functionCall(tokenId, "storage_deposit", args, GAS, ONE_OCTO_STRING)
-        .then((res: any) => res);
-    };
-    await registor();
+    await handleRegistorToken(contractState, walletState, tokenId);
   };
 
   const _handleClaim = async (item: any) => {
     const tokenId = item?.tokenId || item?.token_id;
-    const decimals = item?.config?.extra_decimals;
-    console.log("tokenId", tokenId);
-    console.log("decimals", decimals);
+    const decimals = tokenFomat[tokenId].decimals;
     if (!tokenId && !decimals) return;
-    // near call $DAI_TOKEN_ID --accountId=$ACCOUNT_ID mint '{
-    //   "account_id": "'$ACCOUNT_ID'",
-    //   "amount": "10000000000000000000000"
-    // }'
-
     const amountClaim = 20 * 10 ** decimals;
-    const args = {
-      account_id: userBalanceState.account_id,
-      amount: amountClaim.toLocaleString("fullwide", { useGrouping: false }),
-    };
-
-    const checkIsUserRegistorToken = async () => {
-      return await contractState.account.functionCall(
-        tokenId,
-        "mint",
-        args,
-        GAS,
-        ONE_OCTO
-      );
-    };
-    await checkIsUserRegistorToken();
+    await claimFreeToken(contractState, walletState, amountClaim, tokenId);
   };
 
-  const getTokenList = async () => {
+  const getTokenList = useCallback(async () => {
     if (contractState !== null) {
       await contractState
         .get_assets_paged({ from_index: 0, limit: 10 })
@@ -181,60 +140,20 @@ function Home() {
             };
           });
           poolListToken.set(fomat);
+          setTokenList(fomat);
           return res;
         })
         .catch((err: any) => console.log(err));
     }
-  };
+  }, [contractState, poolListToken]);
 
   useEffect(() => {
-    setTimeout(() => {
-      getTokenList();
-    }, 500);
+    getTokenList();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [contractState]);
-
-  useEffect(() => {
-    if (poolListTokenState) {
-      setTokenList(poolListTokenState);
-    }
-  }, [poolListTokenState, tokenList]);
 
   return (
     <div className="container homepage">
-      {isShowPopupDeposit && (
-        <DepositPopup
-          tokenId={tokenId}
-          token={tokenChose}
-          togglePopup={_handleTogglePopupDeposit}
-        />
-      )}
-      {isShowPopupBorrow && (
-        <BorrowPopup
-          tokenId={tokenId}
-          token={tokenChose}
-          togglePopup={_handleTogglePopupBorrow}
-        />
-      )}
-      {isShowPopupRegist && (
-        <RegistFirstTime setTurnOff={_handleTogglePopupRegist} />
-      )}
-      {isShowPopupRequireLogin && (
-        <RequireLogin
-          textTitle={popupRequire.textTitle}
-          textConfirm={popupRequire.textConfirm}
-          textCancel={popupRequire.textCancel}
-          togglePopup={_handleTogglePopupRequireLogin}
-        />
-      )}
-      {isShowPopupRequire && (
-        <RequireLogin
-          textTitle={popupRequire.textTitle}
-          textConfirm={popupRequire.textConfirm}
-          textCancel={popupRequire.textCancel}
-          togglePopup={_handleTogglePopupRequire}
-          handleConfirm={popupRequire.handleConfirm}
-        />
-      )}
       <div className="wrap-total">
         <div className="total deposit">
           <p className="title">Total Market Deposited</p>
@@ -265,6 +184,42 @@ function Home() {
           />
         </div>
       </div>
+      {isShowPopupDeposit && (
+        <DepositPopup
+          tokenId={tokenId}
+          token={tokenChose}
+          togglePopup={_handleTogglePopupDeposit}
+        />
+      )}
+      {isShowPopupBorrow && (
+        <BorrowPopup
+          tokenId={tokenId}
+          token={tokenChose}
+          togglePopup={_handleTogglePopupBorrow}
+        />
+      )}
+      {isShowPopupRegist && (
+        <RegistFirstTime setTurnOff={_handleTogglePopupRegist} />
+      )}
+      {isShowPopupRequireLogin && (
+        <RequireLogin
+          textTitle={
+            popupRequire.textTitle || "You need to Login to deposit or borrow !"
+          }
+          textConfirm={popupRequire.textConfirm || "Log In"}
+          textCancel={popupRequire.textCancel || "Cancel"}
+          togglePopup={_handleTogglePopupRequireLogin}
+        />
+      )}
+      {isShowPopupRequire && (
+        <RequireLogin
+          textTitle={popupRequire.textTitle}
+          textConfirm={popupRequire.textConfirm}
+          textCancel={popupRequire.textCancel}
+          togglePopup={_handleTogglePopupRequire}
+          handleConfirm={popupRequire.handleConfirm}
+        />
+      )}
     </div>
   );
 }
