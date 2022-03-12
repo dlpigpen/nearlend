@@ -5,7 +5,7 @@ import waveTop from "../images/wave-top.png";
 import waveBot from "../images/wave-bot.png";
 import waveMid from "../images/wave-mid.png";
 import Header from "../components/header";
-import Portfolio from '../components/Portfolio'
+import Portfolio from "../components/portfolio";
 import NftDetail from "../components/nft-detail";
 import Marketplace from "../components/marketplace";
 import WhitePaper from "../components/white-paper";
