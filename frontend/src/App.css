@@ -977,8 +977,8 @@ footer {
 .nft-detail .nft-info .wrap-detail .wrap-button {
   width: 100%;
   position: absolute;
-  bottom: 0;
-  left: 0;
+  bottom: auto;
+  left: auto;
   padding: 10px 0 0;
   background: var(--origin-black);
 }
@@ -1891,7 +1891,7 @@ footer {
 .button-basic {
   cursor: pointer;
   pointer-events: all;
-  padding: 4px;
+  padding: 6px;
   background: transparent;
   border: 1px solid var(--greenlight);
   color: #fff;

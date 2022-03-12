@@ -21,9 +21,7 @@ export default function Header() {
   const contractState = contract.attach(Downgraded).get();
   const userBalanceState = userBalance.attach(Downgraded).get();
   const walletState = wallet.attach(Downgraded).get();
-  const usdTokensState = usdTokens.attach(Downgraded).get();
   const [isLoginMore, setIsLoginMore] = useState(false);
-  const [listUsdPriceToken, setListUsdPriceToken] = useState(null);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(true);
   const { pathname } = useLocation();
@@ -76,9 +74,9 @@ export default function Header() {
   };
 
   const handleClickMenuItem = () => {
-    setIsLoginMore(false)
-    setIsMenuOpen(false)
-  }
+    setIsLoginMore(false);
+    setIsMenuOpen(false);
+  };
 
   useEffect(() => {
     if (contractState === null || userBalanceState === null) {
@@ -91,7 +89,7 @@ export default function Header() {
       window.addEventListener("scroll", handleScoll);
 
       if (window.innerWidth > 820) {
-        setIsMobile(false)
+        setIsMobile(false);
       }
       return () => window.removeEventListener("scroll", handleScoll);
     }
@@ -133,7 +131,6 @@ export default function Header() {
   useEffect(() => {
     async function initGetUSDPrice() {
       const res = await getUsdtOfToken();
-      setListUsdPriceToken(res);
       usdTokens.set(res);
     }
     initGetUSDPrice();
@@ -147,88 +144,89 @@ export default function Header() {
             <img alt="Nearlend" src={logo} width={98} height={98} />
           </Link>
         </h1>
-        {isMobile && <div className="hamburger" onClick={handleOpenMenu}>
-          {isMenuOpen ? <CloseOutlined /> : <MenuOutlined />}
-        </div>}
+        {isMobile && (
+          <div className="hamburger" onClick={handleOpenMenu}>
+            {isMenuOpen ? <CloseOutlined /> : <MenuOutlined />}
+          </div>
+        )}
         {/* {!isMobile && ( */}
-          <nav className={isMenuOpen ? 'active' : ''}>
-            {console.log('aaaaaa')}
-            <ul>
-              <li onClick={handleClickMenuItem}>
-                <Link to="/">Home</Link>
-              </li>
-              <li onClick={handleClickMenuItem}>
-                <Link to="/white-paper">Whitepaper</Link>
-              </li>
-              {path === "/" ? (
+        <nav className={isMenuOpen ? "active" : ""}>
+          <ul>
+            <li onClick={handleClickMenuItem}>
+              <Link to="/">Home</Link>
+            </li>
+            <li onClick={handleClickMenuItem}>
+              <Link to="/white-paper">Whitepaper</Link>
+            </li>
+            {path === "/" ? (
+              <>
+                <li onClick={handleClickMenuItem}>
+                  <Link to="/app">Launch App</Link>
+                </li>
+                <li onClick={handleClickMenuItem}>
+                  <Link to="/marketplace">Marketplace</Link>
+                </li>
+              </>
+            ) : (
+              ""
+            )}
+            {path === "/app" ||
+            path === "/portfolio" ||
+            path === "/marketplace" ? (
+              isLogin ? (
                 <>
+                  {/* {path === "/portfolio" || path === "/marketplace"  ? (
+                    <> */}
                   <li onClick={handleClickMenuItem}>
-                    <Link to="/app">Launch App</Link>
+                    <Link to="/app">App</Link>
                   </li>
                   <li onClick={handleClickMenuItem}>
                     <Link to="/marketplace">Marketplace</Link>
                   </li>
-                </>
-              ) : (
-                ""
-              )}
-              {path === "/app" ||
-              path === "/portfolio" ||
-              path === "/marketplace" ? (
-                isLogin ? (
-                  <>
-                    {/* {path === "/portfolio" || path === "/marketplace"  ? (
-                    <> */}
-                    <li onClick={handleClickMenuItem}>
-                      <Link to="/app">App</Link>
-                    </li>
-                    <li onClick={handleClickMenuItem}>
-                      <Link to="/marketplace">Marketplace</Link>
-                    </li>
-                    {/* </>
+                  {/* </>
                   ) : (
                     ""
                   )} */}
-                    <li
-                      className="btn-connect"
-                      onClick={() => setIsLoginMore(!isLoginMore)}
+                  <li
+                    className="btn-connect"
+                    onClick={() => setIsLoginMore(!isLoginMore)}
+                  >
+                    {accountName}{" "}
+                    <img
+                      alt="Arrow down"
+                      src={arrow_down_white}
+                      width={12}
+                      height={10}
+                    />
+                    <div
+                      className={`more ${isLoginMore ? "active" : ""}`}
+                      onClick={handleClickMenuItem}
                     >
-                      {accountName}{" "}
-                      <img
-                        alt="Arrow down"
-                        src={arrow_down_white}
-                        width={12}
-                        height={10}
-                      />
-                      <div
-                        className={`more ${isLoginMore ? "active" : ""}`}
-                        onClick={handleClickMenuItem}
-                      >
-                        <Link to="/portfolio">
-                          <span
-                            className={`${
-                              path === "/portfolio" ? "link-active" : "ok"
-                            }`}
-                          >
-                            Portfolio
-                          </span>
-                        </Link>
-                        <a href={"?"} onClick={logout}>
-                          Sign Out
-                        </a>
-                      </div>
-                    </li>
-                  </>
-                ) : (
-                  <li onClick={login} className="btn-connect">
-                    Connect to Wallet
+                      <Link to="/portfolio">
+                        <span
+                          className={`${
+                            path === "/portfolio" ? "link-active" : "ok"
+                          }`}
+                        >
+                          Portfolio
+                        </span>
+                      </Link>
+                      <a href={"?"} onClick={logout}>
+                        Sign Out
+                      </a>
+                    </div>
                   </li>
-                )
+                </>
               ) : (
-                ""
-              )}
-            </ul>
-          </nav>
+                <li onClick={login} className="btn-connect">
+                  Connect to Wallet
+                </li>
+              )
+            ) : (
+              ""
+            )}
+          </ul>
+        </nav>
         {/* )} */}
       </div>
     </header>

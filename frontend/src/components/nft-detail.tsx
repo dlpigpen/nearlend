@@ -17,6 +17,12 @@ import { QuestionCircleOutlined } from "@ant-design/icons";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import CommingSoon from "./Popup/CommingSoon";
+import { Select } from "antd";
+
+const { Option } = Select;
+
+const optionsFake = ["BTC", "ETH", "NEO", "NEL", "ARK", "NEAR"];
+const durationFake = ["3 Days", "7 Days", "30 Days", "1 Month", "1 Year"];
 
 export default function NftDetail() {
   const [data, setData]: any = useState(null);
@@ -38,6 +44,20 @@ export default function NftDetail() {
     setIsShowNoti(false);
   };
 
+  function handleChange(value: any) {
+    console.log(`selected ${value}`);
+  }
+
+  function handleChangeInput(value: any) {
+    console.log(`selected ${value}`);
+  }
+  function handleChangeDurations(value: any) {
+    console.log(`selected ${value}`);
+  }
+  
+  function handleChangeAPR(value: any) {
+    console.log(`selected ${value}`);
+  }
   return (
     <main className="nft-detail">
       <div className="wrap-body">
@@ -120,6 +140,111 @@ export default function NftDetail() {
                 <p className="description">{data?.desc}</p>
               </div>
 
+              <div className="wrap-offer" style={{ padding: "24px 0 120px" }}>
+                <div style={{ paddingBottom: "24px" }}>
+                  <h3>Loan Value</h3>
+                  <div style={{ display: "flex" }}>
+                    <div style={{ width: "100%" }}>
+                      <Input
+                        style={{ width: "100%" }}
+                        onChange={handleChangeInput}
+                        type="number"
+                        pattern="[0-9]*"
+                      />
+                    </div>
+                    <div>
+                      <Select
+                        style={{ width: "100px" }}
+                        defaultValue="BTC"
+                        onChange={handleChange}
+                      >
+                        {optionsFake.map((item, idx) => (
+                          <Option value={item} key={idx.toString()}>
+                            {item}
+                          </Option>
+                        ))}
+                      </Select>
+                    </div>
+                  </div>
+                </div>
+
+                <div style={{ paddingBottom: "24px" }}>
+                  <h3>Repayment Value</h3>
+                  <div style={{ display: "flex" }}>
+                    <div style={{ width: "100%" }}>
+                      <Input
+                        style={{ width: "100%" }}
+                        onChange={handleChangeInput}
+                        type="number"
+                        pattern="[0-9]*"
+                      />
+                    </div>
+                    <div>
+                      <Select
+                        style={{ width: "100px" }}
+                        defaultValue="NEL"
+                        onChange={handleChange}
+                      >
+                        {optionsFake.map((item, idx) => (
+                          <Option value={item} key={idx.toString()}>
+                            {item}
+                          </Option>
+                        ))}
+                      </Select>
+                    </div>
+                  </div>
+                </div>
+                <div
+                  style={{
+                    paddingBottom: "24px",
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "flex-end",
+                  }}
+                >
+                  <div style={{ minWidth: "100px" }}>
+                    <h3>Durations</h3>
+                    <div>
+                      <Select
+                        defaultValue="7 Days"
+                        onChange={handleChangeDurations}
+                        style={{ width: "100%" }}
+                      >
+                        {durationFake.map((item, idx) => (
+                          <Option value={item} key={idx.toString()}>
+                            {item}
+                          </Option>
+                        ))}
+                      </Select>
+                    </div>
+                  </div>
+                  <div style={{ marginLeft: "14px" }}>
+                    <h3>APR</h3>
+                    <Input.Group
+                      compact
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                      }}
+                    >
+                      <Input
+                        onChange={handleChangeAPR}
+                        type="number"
+                        pattern="[0-9]*"
+                      />
+                      <p
+                        style={{
+                          paddingLeft: "10px",
+                        }}
+                      >
+                        %
+                      </p>
+                    </Input.Group>
+                  </div>
+                  <button className="button-basic">Make Offer</button>
+                </div>
+              </div>
+
               <div className="wrap-button">
                 <div className="price">
                   <div className="left-side">
@@ -159,7 +284,9 @@ export default function NftDetail() {
                   <Tooltip
                     className="comtfee-tooltip"
                     color={"#2196f3"}
-                    title={"Comtfee - comment with fee, to show your love with the Creator NFT !"}
+                    title={
+                      "Comtfee - comment with fee, to show your love with the Creator NFT !"
+                    }
                   >
                     <QuestionCircleOutlined />
                   </Tooltip>
